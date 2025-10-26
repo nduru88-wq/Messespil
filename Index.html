@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knight coin – Highscore, Regler & Demo</title>
+  <style>
+    :root{
+      --bg: #0b0d12;
+      --panel: #111521;
+      --text: #e8eefc;
+      --muted: #b6c4e4;
+      --good: #42d392;
+      --border: #1c2232;
+      --rules-bg: #1e2a8a;
+      --rules-accent: #ffd24d;
+
+      --hs_top_ratio: 0.52;
+      --video_zoom: 1.25;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
+    }
+    .wrap{
+      display:grid;grid-template-columns:42% 58%;gap:12px;padding:12px;height:100vh;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03);
+      display:flex;flex-direction:column;min-height:0;
+    }
+    .panel-header{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);
+      flex:0 0 auto;
+    }
+    .panel-header h2{margin:0;font-size:18px}
+    .panel-header small{color:var(--muted)}
+    .content{padding:0;flex:1;min-height:0}
+    .content.pad{padding:16px;overflow:auto}
+
+    .right{
+      display:grid;
+      grid-template-rows: calc(var(--hs_top_ratio) * 1fr) 1fr;
+      gap:12px;min-height:0;
+    }
+
+    /* Venstre panel: centrer overskrift */
+    .rules{ background:var(--rules-bg); border:1px solid rgba(255,255,255,.15); }
+    .rules .panel-header{
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+      border-bottom:1px solid rgba(255,255,255,.15);
+      justify-content:center;
+    }
+    .rules .panel-header h2{font-size:22px;color:#fff;text-align:center}
+    .rules .content.pad{color:#eef3ff}
+    .rules h3{margin:.8rem 0 .4rem;color:var(--rules-accent)}
+    .rules p{margin:.4rem 0}
+    .rules ul{margin:.4rem 0 .2rem 1.2rem;padding:0}
+    .rules li{margin:.25rem 0}
+
+    .drink-row{
+      display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;
+      background:rgba(0,0,0,.15);padding:14px 16px;border-radius:12px;margin:10px 0 14px 0;
+      border:1px solid rgba(255,255,255,.15);
+    }
+    .drink-svg{width:86px;height:120px;display:block}
+
+    /* Bonusinfo-boks */
+    .info-box{
+      margin-top:12px;padding:12px;border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+      color:#eaf0ff;
+    }
+    .info-box strong{color:#ffe184}
+
+    .hs-content{ padding:10px 12px; overflow:visible; }
+    .hs-grid{ display:grid; grid-template-columns: 1.15fr 0.85fr; gap:12px; align-items:start; }
+
+    .hs-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+    .hs-table th,.hs-table td{
+      padding:8px 8px; border-bottom:1px dashed rgba(255,255,255,.08);
+      font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .hs-table thead th{
+      color:var(--muted); font-weight:600; border-bottom:1px solid var(--border); background:var(--panel);
+    }
+    .col-rank{ width:8ch; text-align:left; color:var(--muted); }
+    .col-name{ text-align:center; }
+    .col-time{ width:11ch; text-align:right; font-weight:700; color:var(--good); }
+
+    .hs-form{
+      display:grid; gap:8px; align-items:end;
+      border:1px solid var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.02);
+    }
+    .hs-form .row2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .hs-form label{ font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+    .hs-form input{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+      background:#0f1422; color:#fff; outline:none;
+    }
+    .btn{
+      height:40px; padding:0 16px; border-radius:10px; border:1px solid #2a6bff55;
+      background:#2a6bff22; color:#cfe0ff; cursor:pointer; font-weight:600;
+    }
+    .btn:hover{ background:#2a6bff33; }
+    .btn-ghost{
+      height:40px; padding:0 14px; border-radius:10px; border:1px solid rgba(255,255,255,.15);
+      background:transparent; color:#cfe0ff; cursor:pointer;
+    }
+    .btn-ghost:hover{ background:rgba(255,255,255,.06); }
+
+    .no-header .content{ height:100%; }
+    .video-wrap{ height:100%; position:relative; background:#000; overflow:hidden; }
+    video{
+      display:block; height:100%; width:100%;
+      object-fit:cover; transform:scale(var(--video_zoom)); transform-origin:center center;
+    }
+    .video-overlay{
+      position:absolute; left:10px; bottom:10px; padding:6px 10px; font-size:12px;
+      background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.2); color:#ddd; border-radius:8px;
+    }
+
+    @media (max-width:1050px){
+      .wrap{ grid-template-columns:1fr; height:auto; }
+      .right{ grid-template-rows:auto auto; }
+      .hs-grid{ grid-template-columns:1fr; }
+      .hs-form .row2{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- VENSTRE: REGLER -->
+    <section class="rules card">
+      <div class="panel-header">
+        <h2>Knight coin – Vind en sodavand</h2>
+      </div>
+      <div class="content pad">
+        <div class="drink-row" aria-label="Tegning af fire sodavandsdåser i metal-look">
+          <!-- ==== Cola (metal look) ==== -->
+          <svg class="drink-svg" viewBox="0 0 100 140" role="img" aria-label="Cola dåse (tegning)">
+            <defs>
+              <!-- Metal ringe -->
+              <linearGradient id="metalRing1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#f5f9ff"/><stop offset="0.4" stop-color="#c9d6ea"/>
+                <stop offset="0.6" stop-color="#9fb0d2"/><stop offset="1" stop-color="#e6eef7"/>
+              </linearGradient>
+              <!-- Kroppens farve + metal banding -->
+              <linearGradient id="colaBody" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#5f0d0d"/>
+                <stop offset="0.15" stop-color="#b01c1c"/>
+                <stop offset="0.5" stop-color="#d74141"/>
+                <stop offset="0.85" stop-color="#7a1111"/>
+                <stop offset="1" stop-color="#3e0808"/>
+              </linearGradient>
+              <!-- Spejlglimt -->
+              <linearGradient id="specCola" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+              </linearGradient>
+            </defs>
+            <!-- Ringe -->
+            <rect x="15" y="6" width="70" height="10" rx="3" fill="url(#metalRing1)" />
+            <rect x="15" y="124" width="70" height="10" rx="3" fill="url(#metalRing1)" />
+            <!-- Krop -->
+            <rect x="12" y="12" width="76" height="116" rx="12" fill="url(#colaBody)" />
+            <!-- Vertikal glansstribe -->
+            <rect x="18" y="16" width="10" height="108" rx="5" fill="url(#specCola)" />
+            <!-- Rundt glimt -->
+            <ellipse cx="60" cy="24" rx="22" ry="8" fill="rgba(255,255,255,.18)"/>
+            <!-- Tekst -->
+            <text x="50" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">COLA</text>
+          </svg>
+
+          <!-- ==== Faxe Kondi (metal look) ==== -->
+          <svg class="drink-svg" viewBox="0 0 100 140" role="img" aria-label="Faxe Kondi dåse (tegning)">
+            <defs>
+              <linearGradient id="metalRing2" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#f5f9ff"/><stop offset="0.4" stop-color="#c9d6ea"/>
+                <stop offset="0.6" stop-color="#9fb0d2"/><stop offset="1" stop-color="#e6eef7"/>
+              </linearGradient>
+              <linearGradient id="faxeBody" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#0b3f29"/>
+                <stop offset="0.18" stop-color="#1ea765"/>
+                <stop offset="0.5" stop-color="#52e79d"/>
+                <stop offset="0.82" stop-color="#178a53"/>
+                <stop offset="1" stop-color="#0a2c1d"/>
+              </linearGradient>
+              <linearGradient id="specFaxe" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+              </linearGradient>
+            </defs>
+            <rect x="15" y="6" width="70" height="10" rx="3" fill="url(#metalRing2)" />
+            <rect x="15" y="124" width="70" height="10" rx="3" fill="url(#metalRing2)" />
+            <rect x="12" y="12" width="76" height="116" rx="12" fill="url(#faxeBody)" />
+            <rect x="18" y="16" width="10" height="108" rx="5" fill="url(#specFaxe)" />
+            <ellipse cx="60" cy="24" rx="22" ry="8" fill="rgba(255,255,255,.18)"/>
+            <text x="50" y="82" text-anchor="middle" font-size="14" font-weight="800" fill="#07361e">FAXE</text>
+            <text x="50" y="100" text-anchor="middle" font-size="14" font-weight="800" fill="#07361e">KONDI</text>
+          </svg>
+
+          <!-- ==== Fanta (metal look) ==== -->
+          <svg class="drink-svg" viewBox="0 0 100 140" role="img" aria-label="Fanta dåse (tegning)">
+            <defs>
+              <linearGradient id="metalRing3" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#f5f9ff"/><stop offset="0.4" stop-color="#c9d6ea"/>
+                <stop offset="0.6" stop-color="#9fb0d2"/><stop offset="1" stop-color="#e6eef7"/>
+              </linearGradient>
+              <linearGradient id="fantaBody" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#7a2f00"/>
+                <stop offset="0.18" stop-color="#ff8f2a"/>
+                <stop offset="0.5" stop-color="#ffb766"/>
+                <stop offset="0.82" stop-color="#ff7a00"/>
+                <stop offset="1" stop-color="#6c2800"/>
+              </linearGradient>
+              <linearGradient id="specFanta" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+              </linearGradient>
+            </defs>
+            <rect x="15" y="6" width="70" height="10" rx="3" fill="url(#metalRing3)" />
+            <rect x="15" y="124" width="70" height="10" rx="3" fill="url(#metalRing3)" />
+            <rect x="12" y="12" width="76" height="116" rx="12" fill="url(#fantaBody)" />
+            <rect x="18" y="16" width="10" height="108" rx="5" fill="url(#specFanta)" />
+            <ellipse cx="60" cy="24" rx="22" ry="8" fill="rgba(255,255,255,.18)"/>
+            <text x="50" y="84" text-anchor="middle" font-size="16" font-weight="900" fill="#2d1a00">FANTA</text>
+          </svg>
+
+          <!-- ==== Pepsi Max (metal look) ==== -->
+          <svg class="drink-svg" viewBox="0 0 100 140" role="img" aria-label="Pepsi Max dåse (tegning)">
+            <defs>
+              <linearGradient id="metalRing4" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#f5f9ff"/><stop offset="0.4" stop-color="#c9d6ea"/>
+                <stop offset="0.6" stop-color="#9fb0d2"/><stop offset="1" stop-color="#e6eef7"/>
+              </linearGradient>
+              <linearGradient id="pepsiBody" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#0d1118"/>
+                <stop offset="0.15" stop-color="#1a1f29"/>
+                <stop offset="0.5" stop-color="#0e1016"/>
+                <stop offset="0.85" stop-color="#1a1f29"/>
+                <stop offset="1" stop-color="#0a0c11"/>
+              </linearGradient>
+              <linearGradient id="specPepsi" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="rgba(255,255,255,0.60)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+              </linearGradient>
+            </defs>
+            <rect x="15" y="6" width="70" height="10" rx="3" fill="url(#metalRing4)" />
+            <rect x="15" y="124" width="70" height="10" rx="3" fill="url(#metalRing4)" />
+            <rect x="12" y="12" width="76" height="116" rx="12" fill="url(#pepsiBody)" />
+            <rect x="18" y="16" width="10" height="108" rx="5" fill="url(#specPepsi)" />
+            <ellipse cx="60" cy="24" rx="22" ry="8" fill="rgba(255,255,255,.16)"/>
+            <!-- Pepsi “globe” (simplificeret) -->
+            <g transform="translate(50,58)">
+              <circle r="16" fill="#1b4fb8"></circle>
+              <path d="M -16,0 A 16,16 0 0 1 16,0 Q 0,6 -16,0 Z" fill="#ffffff"/>
+              <path d="M -16,0 A 16,16 0 0 1 0,-15 A 16,16 0 0 1 16,0 Q 0,6 -16,0 Z" fill="#e63946" opacity="0.95"/>
+            </g>
+            <text x="50" y="98" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff" letter-spacing="1">PEPSI</text>
+            <text x="50" y="112" text-anchor="middle" font-size="14" font-weight="900" fill="#ff2d2d">MAX</text>
+          </svg>
+        </div>
+
+        <!-- Opdateret tekst -->
+        <p><strong>Prøv spillet Knight coin</strong></p>
+        <p>Saml alle guldmønterne på kortest tid muligt! 🪙</p>
+        <p><strong>Klarer</strong> du det på under 1 minut, så giver vi en sodavand 🙂 🥤</p>
+
+        <h3>Controls / Styring</h3>
+        <ul>
+          <li><strong>Højre:</strong> D eller →</li>
+          <li><strong>Venstre:</strong> A eller ←</li>
+          <li><strong>Hop:</strong> Mellemrum, W eller ↑</li>
+          <li><strong>Start forfra:</strong> Enter</li>
+          <li><strong>Start:</strong> F</li>
+        </ul>
+
+        <div class="info-box">
+          <p><strong>Bonusinfo:</strong> Spillet er lavet af Isaac, der er i STU-forløb hos Special Minds.</p>
+          <p>Han er også med her på messen og præsenterer spillet.</p>
+          <p>Så tøv ikke, hvis du har nogle spørgsmål :)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HØJRE: TOP = Highscore, BUND = Video -->
+    <section class="right">
+      <!-- Highscore -->
+      <article class="card">
+        <div class="panel-header">
+          <h2>Highscore</h2>
+          <small id="hsUpdated">–</small>
+        </div>
+        <div class="content hs-content">
+          <div class="hs-grid">
+            <!-- Venstre: tabel -->
+            <div>
+              <table class="hs-table" aria-live="polite">
+                <thead>
+                  <tr>
+                    <th class="col-rank">Placering</th>
+                    <th class="col-name">Navn</th>
+                    <th class="col-time">Tid</th>
+                  </tr>
+                </thead>
+                <tbody id="hsBody"></tbody>
+              </table>
+            </div>
+
+            <!-- Højre: formular -->
+            <form class="hs-form" id="hsForm" autocomplete="off">
+              <div>
+                <label for="inpName">Navn</label>
+                <input id="inpName" name="name" type="text" placeholder="fx Melina 6.B" required />
+              </div>
+              <div>
+                <label for="inpTime">Tid</label>
+                <input id="inpTime" name="time" type="text" placeholder="fx 1,45 eller 83,4" required />
+              </div>
+              <div class="row2">
+                <button class="btn" type="submit">Send</button>
+                <button class="btn-ghost" type="button" id="btnReset">Nulstil</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </article>
+
+      <!-- Video (ingen header) -->
+      <article class="card no-header">
+        <div class="content">
+          <div class="video-wrap">
+            <video id="gameVideo" autoplay muted loop playsinline preload="auto">
+              <source src="minfilm.mp4" type="video/mp4">
+              Din browser understøtter ikke video-elementet.
+            </video>
+            <div class="video-overlay">Autoplay er slået <strong>til</strong> (muted)</div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    // ===== Highscore (localStorage) =====
+    const HS_KEY = 'knightcoin_highscores_v1';
+    const MAX_ROWS = 5;
+    const RESET_PIN = '123'; // 3-cifret PIN før nulstil
+
+    const tbody = document.getElementById('hsBody');
+    const hsUpdated = document.getElementById('hsUpdated');
+    const form = document.getElementById('hsForm');
+    const inpName = document.getElementById('inpName');
+    const inpTime = document.getElementById('inpTime');
+    const btnReset = document.getElementById('btnReset');
+
+    function fmtStamp(d=new Date()){
+      return d.toLocaleString('da-DK', { hour12:false });
+    }
+    function normalizeName(s){
+      return String(s || '').trim().replace(/\s+/g,' ');
+    }
+    function loadScores(){
+      try{
+        const raw = localStorage.getItem(HS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    }
+    function saveScores(arr){
+      localStorage.setItem(HS_KEY, JSON.stringify(arr));
+      hsUpdated.textContent = 'Sidst opdateret: ' + fmtStamp();
+    }
+
+    // Parse "tid" til millisekunder.
+    // UNDERSTØTTER: "mm:ss", "mm:ss,cc"/"mm:ss.cc", "ss", "ss,cc"/"ss.cc"
+    // AFVISER: "hh:mm:ss" (timer tillades ikke)
+    function parseTimeToMs(s){
+      if (!s) return NaN;
+      s = String(s).trim().replace(/,/g, '.'); // komma -> punktum
+      const parts = s.split(':');
+
+      if (parts.length >= 3) return NaN; // ingen timer
+
+      let ms = 0;
+      if (parts.length === 1){
+        const sec = Number(parts[0]);
+        if (!isFinite(sec)) return NaN;
+        ms = Math.round(sec * 1000);
+      } else if (parts.length === 2){
+        const m = Number(parts[0]);
+        const sec = Number(parts[1]);
+        if (!isFinite(m) || !isFinite(sec)) return NaN;
+        if (sec >= 60 || sec < 0 || m < 0) return NaN; // sekunder skal være < 60
+        ms = Math.round((m*60 + sec) * 1000);
+      }
+      return ms;
+    }
+
+    // VISNING: altid sekunder.med hundrededele (ss.cc) – ingen min/timer
+    function formatMs(ms){
+      if (!isFinite(ms)) return '';
+      let s = (ms / 1000).toFixed(2); // fx "1.45", "83.45"
+      if (s.endsWith('.00')) s = s.slice(0, -3);
+      return s;
+    }
+
+    function renderTable(scores){
+      const rows = [];
+      for (let i=0; i<MAX_ROWS; i++) rows.push(scores[i] || { name:'–', ms:NaN });
+      tbody.innerHTML = '';
+      rows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-rank">${idx+1}.</td>
+          <td class="col-name">${row.name || '—'}</td>
+          <td class="col-time">${isFinite(row.ms) ? formatMs(row.ms) : '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function upsertScore(name, ms){
+      const cleanName = normalizeName(name);
+      if (!cleanName) return;
+
+      const list = loadScores();
+      const idx = list.findIndex(x => normalizeName(x.name).toLowerCase() === cleanName.toLowerCase());
+
+      if (idx >= 0){
+        if (isFinite(ms) && ms < list[idx].ms){
+          list[idx].ms = ms;
+          list[idx].at = Date.now();
+        } else {
+          alert('Navnet findes allerede med en bedre eller samme tid.');
+        }
+      } else {
+        list.push({ name: cleanName, ms, at: Date.now() });
+      }
+
+      list.sort((a,b) => (a.ms - b.ms) || (a.at - b.at));
+      const top = list.filter(x => isFinite(x.ms)).slice(0, MAX_ROWS);
+      saveScores(top);
+      renderTable(top);
+    }
+
+    // Init
+    (function initHS(){
+      const current = loadScores();
+      renderTable(current);
+      if (current.length) hsUpdated.textContent = 'Sidst opdateret: ' + fmtStamp();
+    })();
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = inpName.value.trim();
+      const ms = parseTimeToMs(inpTime.value);
+      if (!name){
+        alert('Skriv et navn.');
+        return;
+      }
+      if (!isFinite(ms)){
+        alert('Ugyldigt tidsformat.\nTilladt: mm:ss  •  mm:ss,cc  •  ss  •  ss,cc\n(Timer er ikke tilladt)');
+        return;
+      }
+      upsertScore(name, ms);
+      form.reset();
+      inpName.focus();
+    });
+
+    btnReset.addEventListener('click', () => {
+      const code = prompt('Indtast 3-cifret PIN for at nulstille:');
+      if (code === null) return;
+      if (!/^\d{3}$/.test(code)){
+        alert('PIN skal være 3 cifre.');
+        return;
+      }
+      if (code !== RESET_PIN){
+        alert('Forkert PIN.');
+        return;
+      }
+      if (confirm('Vil du nulstille highscore-listen? Dette kan ikke fortrydes.')){
+        localStorage.removeItem(HS_KEY);
+        renderTable([]);
+        hsUpdated.textContent = 'Nulstillet';
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden){
+        document.getElementById('gameVideo').play().catch(()=>{});
+      }
+    });
+  </script>
+</body>
+</html>
